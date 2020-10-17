@@ -1,5 +1,8 @@
-package com.sy.ticketingsystem.core;
+package com.sy.ticketingsystem.core.domain.model;
 
+import lombok.Getter;
+
+@Getter
 public class Error {
 
   private String message;

@@ -1,12 +1,17 @@
 package com.sy.ticketingsystem.command.application.board;
 
-import com.sy.ticketingsystem.core.Command;
+import com.sy.ticketingsystem.core.application.Command;
 import java.util.UUID;
-import lombok.Builder;
+import lombok.Value;
 
-@Builder
-public class ArchiveBoardCommand extends Command {
+@Value
+public class ArchiveBoardCommand implements Command {
 
-  public UUID id;
+  private UUID boardId;
+
+  public static ArchiveBoardCommand newInstance(UUID boardId) {
+
+    return new ArchiveBoardCommand(boardId);
+  }
 
 }

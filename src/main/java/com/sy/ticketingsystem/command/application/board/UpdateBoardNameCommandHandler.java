@@ -14,12 +14,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
-public class ArchiveBoardCommandHandler implements CommandHandler<ArchiveBoardCommand, Board>  {
+public class UpdateBoardNameCommandHandler implements CommandHandler<UpdateBoardNameCommand, Board> {
 
   private final BoardRepository boardRepository;
 
   @Override
-  public Either<Error, Board> handle(ArchiveBoardCommand command) {
+  public Either<Error, Board> handle(UpdateBoardNameCommand command) {
 
     return boardRepository.findById(BoardId.fromExisting(command.getBoardId().toString()))
                           .filterOrElse(theBoard -> !theBoard.isEmpty(),
@@ -28,7 +28,7 @@ public class ArchiveBoardCommandHandler implements CommandHandler<ArchiveBoardCo
                                             , command.getBoardId().toString())))
                           )
                           .map(theBoard -> theBoard.get())
-                          .map(theBoard -> theBoard.archive())
+                          .map(theBoard -> theBoard.updateName(command.getNewName()))
                           .flatMap(theBoard -> theBoard)
                           .map(theBoard -> boardRepository.save(theBoard))
                           .flatMap(errorOrBoard -> errorOrBoard);

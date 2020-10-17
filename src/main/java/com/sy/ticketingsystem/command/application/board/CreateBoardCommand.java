@@ -1,14 +1,20 @@
 package com.sy.ticketingsystem.command.application.board;
 
-import com.sy.ticketingsystem.core.Command;
+import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
+import com.sy.ticketingsystem.core.application.Command;
 import java.util.UUID;
-import lombok.Builder;
+import lombok.Value;
 
-@Builder
-public class CreateBoardCommand extends Command {
+@Value
+public class CreateBoardCommand implements Command {
 
-  public UUID id;
+  private UUID id;
 
-  public String name;
+  private String name;
+
+  public static CreateBoardCommand newInstance(UUID id, String name) {
+
+    return new CreateBoardCommand(id, name);
+  }
 
 }

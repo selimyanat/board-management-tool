@@ -1,15 +1,19 @@
 package com.sy.ticketingsystem.command.application.board;
 
-import com.sy.ticketingsystem.core.Command;
+import com.sy.ticketingsystem.core.application.Command;
 import java.util.UUID;
-import lombok.Builder;
+import lombok.Value;
 
-@Builder
-public class UpdateBoardNameCommand extends Command {
+@Value
+public class UpdateBoardNameCommand implements Command {
 
-  public UUID id;
+  private UUID boardId;
 
-  public String newName;
+  private String newName;
 
+  public static UpdateBoardNameCommand newInstance(UUID boardId, String newName) {
+
+    return new UpdateBoardNameCommand(boardId, newName);
+  }
 
 }
