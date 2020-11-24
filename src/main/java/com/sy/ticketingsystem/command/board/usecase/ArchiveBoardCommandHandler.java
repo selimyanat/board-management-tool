@@ -1,7 +1,6 @@
 package com.sy.ticketingsystem.command.board.usecase;
 
-import static com.sy.ticketingsystem.core.domain.model.Error.of;
-import static java.lang.String.format;
+import static io.vavr.control.Option.some;
 
 import com.sy.ticketingsystem.command.board.domain.model.Board;
 import com.sy.ticketingsystem.command.board.domain.model.BoardId;
@@ -9,7 +8,9 @@ import com.sy.ticketingsystem.command.board.domain.model.BoardRepository;
 import com.sy.ticketingsystem.core.command.CommandHandler;
 import com.sy.ticketingsystem.core.domain.model.Error;
 import io.vavr.control.Either;
+import io.vavr.control.Option;
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,22 +24,28 @@ public class ArchiveBoardCommandHandler implements CommandHandler<ArchiveBoardCo
   @Override
   public Either<Error, Board> handle(ArchiveBoardCommand command) {
 
-    return boardRepository.findById(BoardId.fromExisting(command.getBoardId().toString()))
-                          .filterOrElse(theBoard -> !theBoard.isEmpty(),
-                                        theBoard -> of((format(
-                                            "Board with id %s does not exist. The board cannot be archived."
-                                            , command.getBoardId().toString())))
-                          )
-                          .map(theBoard -> theBoard.get())
-                          .map(theBoard -> theBoard.archive())
-                          .flatMap(theBoard -> theBoard)
-                          .map(theBoard -> boardRepository.save(theBoard))
+    var executionContext = new ExecutionContext();
+    executionContext.command = command;
+
+    return boardRepository.getByIdOrErrorOut(BoardId.fromExisting(command.getBoardId().toString()))
+                          .map(aBoard -> executionContext.setBoard(some(aBoard)))
+                          .map(ctx -> ctx.board.get().archive())
+                          .flatMap(errorOrBoard -> errorOrBoard)
+                          .map(aBoard -> boardRepository.save(executionContext.board.get()))
                           .flatMap(errorOrBoard -> errorOrBoard)
                           .peek(boards -> LOG.info("Successfully archived board with id  {}",
-                                                   command.getBoardId().toString()))
+                                                   executionContext.board.get().getBoardId().toString()))
                           .peekLeft(error -> LOG.error("Could not archive the board with id {} "
                                                            + "because of the following {}",
                                                        command.getBoardId().toString(),
                                                        error.getMessage()));
+  }
+
+
+  @Setter
+  private static class ExecutionContext {
+
+    ArchiveBoardCommand command;
+    Option<Board> board;
   }
 }

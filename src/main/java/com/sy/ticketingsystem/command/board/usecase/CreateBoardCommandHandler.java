@@ -21,7 +21,6 @@ public class CreateBoardCommandHandler implements CommandHandler<CreateBoardComm
 
     return Board.create(command.getName())
                 .map(board -> boardRepository.save(board))
-                .peekLeft(error -> LOG.error(""))
                 .flatMap(errorOrBoard -> errorOrBoard)
                 .peek(board -> LOG.info("A new board has been created with id {}", board.getBoardId()
                                                                                         .getId()))

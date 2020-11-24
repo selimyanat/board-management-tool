@@ -1,6 +1,7 @@
 package com.sy.ticketingsystem.core.domain.model;
 
-import io.vavr.collection.List;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,10 +15,16 @@ public abstract class EventSourceEntity {
 
   private List<DomainEvent> uncommittedChanges;
 
+  protected EventSourceEntity() {
+
+    this.committedChanges = new ArrayList<>();
+    this.uncommittedChanges = new ArrayList<>();
+  }
+
   public void markUnCommittedChangesAsCommitted() {
 
-    this.committedChanges = this.committedChanges.appendAll(this.uncommittedChanges);
-    this.uncommittedChanges = this.uncommittedChanges.removeAll(this.uncommittedChanges);
+    this.committedChanges.addAll(this.uncommittedChanges);
+    this.uncommittedChanges.removeAll(this.uncommittedChanges);
   }
 
   protected void apply(DomainEvent domainEvent, boolean newEvent) {
@@ -25,10 +32,10 @@ public abstract class EventSourceEntity {
     domainEvent.rehydrate(this);
 
     if(newEvent)
-      this.uncommittedChanges = this.uncommittedChanges.append(domainEvent);
+      this.uncommittedChanges.add(domainEvent);
 
     if(!newEvent)
-      this.committedChanges = this.committedChanges.append(domainEvent);
+      this.committedChanges.add(domainEvent);
   }
 
 }

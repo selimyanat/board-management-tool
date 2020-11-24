@@ -1,24 +1,21 @@
 package com.sy.ticketingsystem.command.board.usecase;
 
-import static com.sy.ticketingsystem.command.board.usecase.UpdateBoardNameCommand.newInstance;
+import static com.sy.ticketingsystem.command.board.usecase.UpdateBoardNameCommand.of;
+import static com.sy.ticketingsystem.core.domain.model.Unit.unit;
 import static io.vavr.control.Either.left;
 import static io.vavr.control.Either.right;
-import static io.vavr.control.Option.none;
-import static io.vavr.control.Option.some;
-import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.sy.ticketingsystem.command.board.domain.model.Board;
 import com.sy.ticketingsystem.command.board.domain.model.BoardId;
 import com.sy.ticketingsystem.command.board.domain.model.BoardRepository;
-import com.sy.ticketingsystem.command.board.usecase.UpdateBoardNameCommand;
-import com.sy.ticketingsystem.command.board.usecase.UpdateBoardNameCommandHandler;
 import com.sy.ticketingsystem.core.domain.model.Error;
+import com.sy.ticketingsystem.core.domain.model.Unit;
+import io.vavr.control.Either.Left;
+import io.vavr.control.Either.Right;
 import java.util.UUID;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class UpdateBoardNameCommandHandlerTest {
 
-  private static final UpdateBoardNameCommand COMMAND = newInstance(UUID.randomUUID(), "NEW_NAME");
+  private static Error AN_ERROR = Error.of("Operation cannot be completed");
+
+  private static final UpdateBoardNameCommand COMMAND = of(UUID.randomUUID(), "NEW_NAME");
 
   @Mock
   private BoardRepository boardRepository;
@@ -46,31 +45,28 @@ public class UpdateBoardNameCommandHandlerTest {
   @Test
   public void handle_returns_error_when_board_does_not_exist() {
 
-    when(boardRepository.findById(any(BoardId.class))).thenReturn(right(none()));
+    when(boardRepository.getByIdOrErrorOut(any()))
+        .thenReturn(left(AN_ERROR));
 
     var result = underTest.handle(COMMAND);
-    assertAll(
-        () -> assertTrue(result.isLeft()),
-        () -> assertEquals(format("Board with id %s does not exist. The board cannot be archived.",
-                                  COMMAND.getBoardId()
-                           ),
-                           result.getLeft().getMessage()
-        )
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Left.class)
+              .isEqualTo(left(AN_ERROR));
   }
 
   @DisplayName("Calling handler.handle(...) should return an error if the board name cannot be updated.")
   @Test
   public void handle_returns_error_when_board_name_cannot_be_updated(@Mock Board board) {
 
-    when(boardRepository.findById(any(BoardId.class))).thenReturn(right(some(board)));
-    when(board.updateName(COMMAND.getNewName())).thenReturn(left(Error.of("Something bad happen!!!")));
+    when(boardRepository.getByIdOrErrorOut(any()))
+        .thenReturn(right(board));
+    when(board.updateName(COMMAND.getNewName()))
+        .thenReturn(left(AN_ERROR));
 
     var result = underTest.handle(COMMAND);
-    assertAll(
-        () -> assertTrue(result.isLeft()),
-        () -> assertEquals("Something bad happen!!!", result.getLeft().getMessage())
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Left.class)
+              .isEqualTo(left(AN_ERROR));
   }
 
 
@@ -78,31 +74,36 @@ public class UpdateBoardNameCommandHandlerTest {
   @Test
   public void handle_returns_error_when_board_cannot_be_saved(@Mock Board board) {
 
-    when(boardRepository.findById(any(BoardId.class))).thenReturn(right(some(board)));
-    when(board.updateName(COMMAND.getNewName())).thenReturn(right(board));
-    when(boardRepository.save(board)).thenReturn(left(Error.of("Could not save board!!!")));
+    when(boardRepository.getByIdOrErrorOut(any()))
+        .thenReturn(right(board));
+    when(board.updateName(COMMAND.getNewName()))
+        .thenReturn(right(unit()));
+    when(boardRepository.save(board))
+        .thenReturn(left(AN_ERROR));
 
     var result = underTest.handle(COMMAND);
-    assertAll(
-        () -> assertTrue(result.isLeft()),
-        () -> assertEquals("Could not save board!!!", result.getLeft().getMessage())
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Left.class)
+              .isEqualTo(left(AN_ERROR));
   }
 
   @DisplayName("Calling handler.handle(...) should return unit when board name is updated.")
   @Test
-  public void handle_returns_unit_when_board_name_is_updated(@Mock Board board) {
+  public void handle_returns_board_when_board_name_is_updated(@Mock Board board) {
 
-    when(board.getBoardId()).thenReturn(BoardId.newBoardId());
-    when(boardRepository.findById(any(BoardId.class))).thenReturn(right(some(board)));
-    when(board.updateName(COMMAND.getNewName())).thenReturn(right(board));
-    when(boardRepository.save(board)).thenReturn(right(board));
+    when(board.getBoardId())
+        .thenReturn(BoardId.newBoardId());
+    when(boardRepository.getByIdOrErrorOut(any()))
+        .thenReturn(right(board));
+    when(board.updateName(COMMAND.getNewName()))
+        .thenReturn(right(unit()));
+    when(boardRepository.save(board))
+        .thenReturn(right(board));
 
     var result = underTest.handle(COMMAND);
-    assertAll(
-        () -> assertTrue(result.isRight()),
-        () -> assertEquals(board, result.get())
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Right.class)
+              .isEqualTo(right(board));
   }
 
 }

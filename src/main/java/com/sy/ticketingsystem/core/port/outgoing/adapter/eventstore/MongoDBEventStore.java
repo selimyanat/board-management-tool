@@ -41,9 +41,9 @@ public class MongoDBEventStore implements EventStore {
   public Either<Error, Unit> appendToStream(String streamId, DomainEvent event) {
 
     return eventSerializer.serialize(event)
-                          .map(json -> StoredEvent.newInstance(streamId,
-                                                               event.getClass().getName(),
-                                                               json))
+                          .map(json -> StoredEvent.of(streamId,
+                                                      event.getClass().getName(),
+                                                      json))
                           .map(storedEvent -> Try.of(() -> storedEventRepository.save(storedEvent)))
                           .map(result -> result.toEither())
                           .flatMap(result -> result)

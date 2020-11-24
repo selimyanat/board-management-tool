@@ -5,14 +5,9 @@ import com.sy.ticketingsystem.core.command.Command;
 import java.util.UUID;
 import lombok.Value;
 
-@Value
+@Value(staticConstructor = "of")
 public class ArchiveBoardCommand implements Command<Board> {
 
   private UUID boardId;
-
-  public static ArchiveBoardCommand newInstance(UUID boardId) {
-
-    return new ArchiveBoardCommand(boardId);
-  }
 
 }

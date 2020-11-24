@@ -5,16 +5,12 @@ import com.sy.ticketingsystem.core.command.Command;
 import java.util.UUID;
 import lombok.Value;
 
-@Value
+@Value(staticConstructor = "of")
 public class CreateBoardCommand implements Command<Board> {
 
   private UUID id;
 
   private String name;
 
-  public static CreateBoardCommand newInstance(UUID id, String name) {
-
-    return new CreateBoardCommand(id, name);
-  }
 
 }

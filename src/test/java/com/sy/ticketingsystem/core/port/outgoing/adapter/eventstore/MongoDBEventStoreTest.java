@@ -1,20 +1,20 @@
 package com.sy.ticketingsystem.core.port.outgoing.adapter.eventstore;
 
 import static com.sy.ticketingsystem.core.domain.model.Unit.unit;
+import static io.vavr.control.Either.left;
+import static io.vavr.control.Either.right;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import com.sy.ticketingsystem.core.domain.model.DomainEvent;
-import com.sy.ticketingsystem.core.port.outgoing.adapter.eventstore.EventSerializer;
-import com.sy.ticketingsystem.core.port.outgoing.adapter.eventstore.MongoDBEventStore;
-import com.sy.ticketingsystem.core.port.outgoing.adapter.eventstore.StoredEvent;
-import com.sy.ticketingsystem.core.port.outgoing.adapter.eventstore.StoredEventRepository;
+import com.sy.ticketingsystem.core.domain.model.fixture.ADomainEvent;
+import com.sy.ticketingsystem.core.domain.model.fixture.DomainEventFixture;
+import com.sy.ticketingsystem.core.domain.model.Error;
 import io.vavr.collection.List;
-import lombok.AllArgsConstructor;
+import io.vavr.control.Either.Left;
+import io.vavr.control.Either.Right;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,9 +27,15 @@ public class MongoDBEventStoreTest {
 
   private static final String STREAM_ID_1 = "streamid-1";
 
-  private static final ADomainEvent A_DOMAIN_EVENT_1 = ADomainEvent.newInstance("evt1-prop1", "evt1-prop2");
+  private static final ADomainEvent A_DOMAIN_EVENT_1 = DomainEventFixture.aDomainEvent1();
 
-  private static final ADomainEvent A_DOMAIN_EVENT_2 = ADomainEvent.newInstance("evt1-prop1", "evt2-prop2");
+  private static final ADomainEvent A_DOMAIN_EVENT_2 = DomainEventFixture.aDomainEvent2();
+
+  private static final StoredEvent A_STORED_EVENT_1 = StoredEventFixture.of(STREAM_ID_1,
+                                                                            A_DOMAIN_EVENT_1);
+
+  private static final StoredEvent A_STORED_EVENT_2 = StoredEventFixture.of(STREAM_ID_1,
+                                                                            A_DOMAIN_EVENT_2);
 
   @Mock
   private EventSerializer eventSerializer;
@@ -51,35 +57,31 @@ public class MongoDBEventStoreTest {
   @Test
   public void readFromStream_returns_domainEvents() {
 
-    when(storedEventRepository.findByStreamId(STREAM_ID_1)).thenReturn(List.of(
-        StoredEvent.newInstance(STREAM_ID_1,
-                                A_DOMAIN_EVENT_1.getClass().getName(),
-                                eventSerializer.serialize(A_DOMAIN_EVENT_1).get()),
-        StoredEvent.newInstance(STREAM_ID_1,
-                                A_DOMAIN_EVENT_2.getClass().getName(),
-                                eventSerializer.serialize(A_DOMAIN_EVENT_2).get())
-    ));
+    var storedEvents = List.of(A_STORED_EVENT_1, A_STORED_EVENT_2);
+    when(storedEventRepository.findByStreamId(STREAM_ID_1)).thenReturn(storedEvents);
 
     var result = underTest.readFromStream(STREAM_ID_1);
     assertAll(
-        () -> assertTrue(result.isRight()),
-        () -> assertTrue(result.get().contains(A_DOMAIN_EVENT_1)),
-        () -> assertTrue(result.get().contains(A_DOMAIN_EVENT_2))
+        () -> Assertions.assertThat(result)
+                        .isNotEmpty()
+                        .isInstanceOf(Right.class),
+        () -> Assertions.assertThat(result.get())
+                        .containsExactly(A_DOMAIN_EVENT_1, A_DOMAIN_EVENT_2)
     );
   }
 
   @Test
   @DisplayName("Calling underTest.readFromStream(...) should return error when an "
-      + "event cannot be deserialized is raised")
+      + "event cannot be deserialized")
   public void readFromStream_returns_error_when_an_event_cannot_be_deserialized() {
 
-    when(storedEventRepository.findByStreamId(STREAM_ID_1)).thenReturn(List.of(
-        StoredEvent.newInstance(STREAM_ID_1,
-                                "INVALID EVENT TYPE THAT BREAK DESERIALIZATION",
-                                eventSerializer.serialize(A_DOMAIN_EVENT_1).get())));
+    var storedEvents = List.of(StoredEventFixture.of(STREAM_ID_1,
+                                            "INVALID EVENT TYPE THAT BREAK DESERIALIZATION",
+                                            A_DOMAIN_EVENT_1));
+    when(storedEventRepository.findByStreamId(STREAM_ID_1)).thenReturn(storedEvents);
 
     var result = underTest.readFromStream(STREAM_ID_1);
-    assertAll(() -> assertTrue(result.isLeft()));
+    Assertions.assertThat(result.isLeft()).isTrue();
   }
 
   @Test
@@ -93,27 +95,21 @@ public class MongoDBEventStoreTest {
            .findByStreamId(STREAM_ID_1);
 
     var result = underTest.readFromStream(STREAM_ID_1);
-    assertAll(
-        () -> assertTrue(result.isLeft()),
-        () -> assertEquals(exception.getMessage(), result.getLeft().getMessage())
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Left.class)
+              .isEqualTo(left(Error.of(exception)));
   }
 
   @DisplayName("Calling underTest.appendToStream(...) should append an event to a stream.")
   @Test
   public void appendToStream_appends_domainEvents() {
 
-    var storedEvt1 = StoredEvent.newInstance(STREAM_ID_1,
-                                             A_DOMAIN_EVENT_1.getClass().getName(),
-                                             eventSerializer.serialize(A_DOMAIN_EVENT_1).get());
-
-    when(storedEventRepository.save(any(StoredEvent.class))).thenReturn(storedEvt1);
+    when(storedEventRepository.save(any(StoredEvent.class))).thenReturn(A_STORED_EVENT_1);
 
     var result = underTest.appendToStream(STREAM_ID_1, A_DOMAIN_EVENT_1);
-    assertAll(
-        () -> assertTrue(result.isRight()),
-        () -> assertEquals(unit(), result.get())
-    );
+    Assertions.assertThat(result)
+              .isInstanceOf(Right.class)
+              .isEqualTo(right(unit()));
   }
 
   @DisplayName("Calling underTest.appendToStream(...) should return an error when an "
@@ -128,34 +124,8 @@ public class MongoDBEventStoreTest {
 
 
     var result = underTest.appendToStream(STREAM_ID_1, A_DOMAIN_EVENT_1);
-    assertAll(
-        () -> assertTrue(result.isLeft()),
-        () -> assertEquals(exception.getMessage(), result.getLeft().getMessage())
-    );
-  }
-
-  @AllArgsConstructor
-  public static class ADomainEvent extends DomainEvent<String> {
-
-    private final String prop1;
-
-    private final String prop2;
-
-    static ADomainEvent newInstance(String prop1, String prop2) {
-
-      return new ADomainEvent(prop1, prop2);
-    }
-
-    @Override
-    public String rehydrate(String s) {
-
-      return s;
-    }
-
-    @Override
-    public String getEventName() {
-
-      return "ADomainEvent";
-    }
+    Assertions.assertThat(result)
+              .isInstanceOf(Left.class)
+              .isEqualTo(left(Error.of(exception)));
   }
 }

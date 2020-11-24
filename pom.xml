@@ -98,7 +98,21 @@
           <target>14</target>
         </configuration>
       </plugin>
-    </plugins>
+			<plugin>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+				<version>2.1.0</version>
+				<configuration>
+					<hierarchical>true</hierarchical>
+					<packages>
+						<package>com.sy.ticketingsystem.core.domain.model</package>
+						<param>com.sy.ticketingsystem.command.board.domain.model</param>
+						<param>com.sy.ticketingsystem.query.board.domain.model</param>
+					</packages>
+				</configuration>
+			</plugin>
+
+		</plugins>
 	</build>
 
 </project>
