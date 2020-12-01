@@ -8,6 +8,8 @@ public interface BoardRepository {
 
   Either<Error, Option<Board>> findById(BoardId boardId);
 
+  Either<Error, Board> getByIdOrErrorOut(BoardId boardId);
+
   Either<Error, Board> save(Board board);
 
 }

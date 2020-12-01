@@ -4,24 +4,18 @@ import com.sy.ticketingsystem.command.board.domain.model.Board.Status;
 import com.sy.ticketingsystem.core.domain.model.DomainEvent;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.Value;
 
 @Getter
 @ToString(callSuper = true)
+@Value(staticConstructor = "of")
 public class BoardArchived extends DomainEvent <Board> {
 
   public static final String BOARD_ARCHIVED = "BOARD_ARCHIVED";
 
+  private BoardId boardId;
+
   private Status formerStatus;
-
-  private BoardArchived(Status formerStatus) {
-    super();
-    this.formerStatus = formerStatus;
-  }
-
-  public static BoardArchived newInstance() {
-
-    return new BoardArchived(Status.ACTIVE);
-  }
 
   public Board rehydrate(Board board) {
 
@@ -32,5 +26,10 @@ public class BoardArchived extends DomainEvent <Board> {
   public String getEventName() {
 
     return BOARD_ARCHIVED;
+  }
+
+  public Status getStatus() {
+
+    return Status.ARCHIVED;
   }
 }

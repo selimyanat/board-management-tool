@@ -5,16 +5,12 @@ import com.sy.ticketingsystem.core.command.Command;
 import java.util.UUID;
 import lombok.Value;
 
-@Value
+@Value(staticConstructor = "of")
 public class UpdateBoardNameCommand implements Command<Board> {
 
   private UUID boardId;
 
   private String newName;
 
-  public static UpdateBoardNameCommand newInstance(UUID boardId, String newName) {
-
-    return new UpdateBoardNameCommand(boardId, newName);
-  }
 
 }
