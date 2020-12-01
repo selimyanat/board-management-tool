@@ -46,6 +46,7 @@ public class BoardArchivedProjectionTest {
 
     underTest.on(BOARD_ARCHIVED);
     Assertions.assertAll(
+        () -> verify(boardView).setName("BREAK THE BUILD"),
         () -> verify(boardView).setStatus(Status.ARCHIVED),
         () -> verify(boardViewRepository).save(boardView),
         () -> verifyNoMoreInteractions(boardView)
