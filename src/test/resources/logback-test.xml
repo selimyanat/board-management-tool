@@ -2,5 +2,5 @@
 <configuration>
   <include resource="org/springframework/boot/logging/logback/base.xml"/>
   <logger name="org.springframework" level="WARN"/>
-  <logger name="com.sy.ticketingsystem" level="DEBUG"/>
+  <logger name="com.sy.board.management" level="DEBUG"/>
 </configuration>

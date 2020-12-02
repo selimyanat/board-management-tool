@@ -113,9 +113,9 @@
 				<configuration>
 					<hierarchical>true</hierarchical>
 					<packages>
-						<package>com.sy.ticketingsystem.core.domain.model</package>
-						<param>com.sy.ticketingsystem.command.board.domain.model</param>
-						<param>com.sy.ticketingsystem.query.board.domain.model</param>
+						<package>com.sy.board.management.core.domain.model</package>
+						<param>com.sy.board.management.command.board.domain.model</param>
+						<param>com.sy.board.management.query.board.domain.model</param>
 					</packages>
 				</configuration>
 			</plugin>
@@ -154,6 +154,7 @@
 				<sonar.projectKey>selimyanat_board-management-tool</sonar.projectKey>
 				<sonar.organization>selimyanat</sonar.organization>
 				<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+				<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 			</properties>
 			<activation>
 				<activeByDefault>false</activeByDefault>
