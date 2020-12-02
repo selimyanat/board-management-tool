@@ -2,7 +2,7 @@
 
 ![Java CI with Maven](https://github.com/selimyanat/board-management-tool/workflows/Java%20CI%20with%20Maven/badge.svg)
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=selimyanat_board-management-tool)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=selimyanat_board-management-tool&metric=alert_status)](https://sonarcloud.io/dashboard?id=selimyanat_board-management-tool)
 
 # Introduction
 
