@@ -2,7 +2,7 @@
 
 ![Java CI with Maven](https://github.com/selimyanat/board-management-tool/workflows/Java%20CI%20with%20Maven/badge.svg)
 
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=selimyanat_board-management-tool)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=selimyanat_board-management-tool&metric=alert_status)](https://sonarcloud.io/dashboard?id=selimyanat_board-management-tool)
 
 # Introduction
 
@@ -67,7 +67,8 @@ the main frameworks and libraries used to implement this application:
  simple and web based applications.
 - [lombok](https://projectlombok.org/) : Framework auto generating code for java (getter, setter, ...).
 - [vavr](http://www.vavr.io): Functional library for java.
-- [mongodb](https://www.h2database.com/html/main.html) : Lightweight in-memory nosql database.
+- [embedded mongodb](https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo) : Lightweight in
+-memory mongodb database.
 - [swagger](https://swagger.io/): Specification for machine-readable interface files for
 describing, producing, consuming, and visualizing RESTful web services 
 - [Junit 5](https://junit.org/junit5/): The next generation of testing framework for java.
@@ -94,7 +95,7 @@ Run the main class `BoardManagementApplication`.
 
 ###  Maven
 
-Open your terminal, navigate to the `TicketingSystemApplication` source directory then run the
+Open your terminal, navigate to the `BoardManagementApplication` source directory then run the
  following command: 
 
 ```
@@ -103,11 +104,11 @@ mvn spring-boot:run
 
 ### Java
 
-Open your terminal, navigate to the `TicketingSystemApplication` source directory then run the
+Open your terminal, navigate to the `BoardManagementApplication` source directory then run the
  following command:  
 
 ```
-java -jar target/ticketing-system-0.0.1-SNAPSHOT.jar
+java -jar target/board-management-api-0.0.1-SNAPSHOT.jar
 ```
  
 

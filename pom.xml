@@ -8,11 +8,11 @@
 		<version>2.3.4.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.sy.ticketing.system</groupId>
-	<artifactId>ticketing-system</artifactId>
+	<groupId>com.sy.board.management</groupId>
+	<artifactId>board-management-api</artifactId>
 	<description>Demo project for Spring Boot</description>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ticketing-system</name>
+	<name>board-management-api</name>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -27,7 +27,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -42,6 +41,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>de.flapdoodle.embed</groupId>
+			<artifactId>de.flapdoodle.embed.mongo</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.springfox</groupId>
